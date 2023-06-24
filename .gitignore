@@ -1,0 +1,7 @@
+
+.tmp/
+*.log
+.idea/
+.vscode/
+*.db
+*.tmp
