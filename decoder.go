@@ -59,15 +59,43 @@ func (d *Decoder) Decode(v any) error {
 		case reflect.String:
 			fieldValue.SetString(v)
 		case reflect.Int:
-			iv, err := strconv.ParseInt(v, 10, 64)
+			err := setIntValue(v, 64, fieldValue)
+			if err != nil {
+				err = fmt.Errorf("failed to parse int value for field '%s':%w", fieldTag, err)
+				return err
+			}
+		case reflect.Int32:
+			err := setIntValue(v, 32, fieldValue)
+			if err != nil {
+				err = fmt.Errorf("failed to parse int value for field '%s':%w", fieldTag, err)
+				return err
+			}
+		case reflect.Int64:
+			err := setIntValue(v, 64, fieldValue)
+			if err != nil {
+				err = fmt.Errorf("failed to parse int value for field '%s':%w", fieldTag, err)
+				return err
+			}
+		case reflect.Bool:
+			iv, err := strconv.ParseBool(v)
 			if err != nil {
 				err = fmt.Errorf("failed to parse value for field '%s':%w", fieldTag, err)
 				return err
 			}
-			fieldValue.SetInt(iv)
+			fieldValue.SetBool(iv)
 		}
 	}
 
+	return nil
+}
+
+func setIntValue(v string, bitSize int, fieldValue reflect.Value) error {
+	iv, err := strconv.ParseInt(v, 10, bitSize)
+	if err != nil {
+		err = fmt.Errorf("failed to parse value '%v' to an integer field: %w", v, err)
+		return err
+	}
+	fieldValue.SetInt(iv)
 	return nil
 }
 
