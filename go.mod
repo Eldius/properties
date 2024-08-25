@@ -1,10 +1,10 @@
 module github.com/eldius/properties
 
-go 1.21
+go 1.23.0
 
 require (
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
