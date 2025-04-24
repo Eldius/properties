@@ -1,20 +1,19 @@
 package properties
 
 import (
+	"errors"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"reflect"
 )
 
-// http://www.inanzzz.com/index.php/post/5p8q/creating-custom-struct-tags-with-golang
-
 var (
-	ErrNotAPointer = errors.New("value must be a pointer")
-	ErrNotAStruct  = errors.New("value must be a struct")
+	ErrNotAPointer       = errors.New("parameter must be a pointer")
+	ErrNotAStruct        = errors.New("value type must be a struct")
+	ErrInvalidFieldValue = errors.New("field value is not valid")
 )
 
-// Encoder encodes an struct pointer to a properties file
+// Encoder encodes a struct pointer to a properties file
 type Encoder struct {
 	w io.Writer
 }
@@ -33,30 +32,32 @@ func (e *Encoder) Encode(v any) error {
 	valueType := valueSource.Type()
 
 	for i := 0; i < valueType.NumField(); i++ {
-		fieldTag, ok := valueType.Field(i).Tag.Lookup(propertiesTag)
-		if !ok {
-			continue
-		}
-
-		fieldName := valueType.Field(i).Name
-		fieldValue := valueSource.FieldByName(fieldName)
-		if !fieldValue.IsValid() {
-			continue
-		}
-
-		_, err := fmt.Fprintf(e.w, "%s=%v", fieldTag, fieldValue)
-		if err != nil {
-			err = fmt.Errorf("writing property line (%s=%v): %w", fieldTag, fieldValue, err)
+		if err := e.parseField(valueType.Field(i), valueSource); err != nil {
 			return err
 		}
+	}
 
-		if i < (valueType.NumField() - 1) {
-			_, err := fmt.Fprintln(e.w)
-			if err != nil {
-				err = fmt.Errorf("writing line break: %w", err)
-				return err
-			}
-		}
+	return nil
+}
+
+func (e *Encoder) parseField(field reflect.StructField, src reflect.Value) error {
+	fieldTag, ok := field.Tag.Lookup(propertiesTag)
+	if !ok {
+		fieldTag = field.Name
+	}
+	if fieldTag == "-" {
+		return nil
+	}
+
+	fieldValue := src.FieldByName(field.Name)
+	if !fieldValue.IsValid() {
+		return fmt.Errorf("%w: field '%s' is not valid", ErrInvalidFieldValue, fieldTag)
+	}
+
+	_, err := fmt.Fprintf(e.w, "%s=%v\n", fieldTag, fieldValue)
+	if err != nil {
+		err = fmt.Errorf("writing property line (%s=%v): %w", fieldTag, fieldValue, err)
+		return err
 	}
 
 	return nil

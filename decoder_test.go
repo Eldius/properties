@@ -13,13 +13,15 @@ type testStruct0 struct {
 }
 
 type complexTestStruct struct {
-	BoolValue0  bool   `properties:"bool-value-0"`
-	BoolValue1  bool   `properties:"bool-value-1"`
-	BoolValue2  bool   `properties:"bool-value-2"`
-	StringValue string `properties:"string.value"`
-	IntValue    int    `properties:"int_value"`
-	IntValue32  int32  `properties:"int32_value"`
-	IntValue64  int64  `properties:"int64_value"`
+	BoolValue0       bool   `properties:"bool-value-0"`
+	BoolValue1       bool   `properties:"bool-value-1"`
+	BoolValue2       bool   `properties:"bool-value-2"`
+	StringValue      string `properties:"string.value"`
+	IntValue         int    `properties:"int_value"`
+	IntValue32       int32  `properties:"int32_value"`
+	IntValue64       int64  `properties:"int64_value"`
+	NotTaggedAttr    string
+	NotPersistedAttr string `properties:"-"`
 }
 
 func TestReadToMap(t *testing.T) {
@@ -162,6 +164,8 @@ key1=value1`))
 			assert.Equal(t, int(42), out.IntValue)
 			assert.Equal(t, int32(32), out.IntValue32)
 			assert.Equal(t, int64(64), out.IntValue64)
+			assert.Equal(t, "Untagged property", out.NotTaggedAttr)
+			assert.Empty(t, out.NotPersistedAttr)
 		})
 	})
 }

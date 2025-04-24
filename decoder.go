@@ -38,6 +38,9 @@ func (d *Decoder) Decode(v any) error {
 	for i := 0; i < valueType.NumField(); i++ {
 		fieldTag, ok := valueType.Field(i).Tag.Lookup(propertiesTag)
 		if !ok {
+			fieldTag = valueType.Field(i).Name
+		}
+		if fieldTag == "-" {
 			continue
 		}
 

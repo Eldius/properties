@@ -1,11 +1,8 @@
 module github.com/eldius/properties
 
-go 1.23.3
+go 1.24.2
 
-require (
-	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.10.0
-)
+require github.com/stretchr/testify v1.10.0
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
